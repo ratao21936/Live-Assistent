@@ -5,62 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Robux Bot</title>
     <style>
-        body { background: #0d0d0d; color: #eee; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 30px; }
-        .container { max-width: 700px; width: 100%; background: #1a1a1a; border-radius: 16px; padding: 24px; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
-        h1 { color: #ffbb00; }
-        input, button { padding: 10px; border-radius: 8px; border: none; font-size: 16px; }
-        input { width: 70%; background: #2a2a2a; color: #fff; }
-        button { background: #ffbb00; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #ffcc33; }
-        .controles { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        #log-area { background: #0d0d0d; border: 1px solid #333; border-radius: 8px; height: 400px; overflow-y: auto; padding: 12px; font-size: 14px; font-family: monospace; color: #ccc; }
-        .log-entry { padding: 4px 0; border-bottom: 1px solid #222; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .container { max-width: 1000px; width: 100%; background: #14141e; border-radius: 20px; padding: 30px; border: 1px solid #2a2a3a; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        h1 { background: linear-gradient(135deg, #ffbb00, #ff8800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status { padding: 6px 16px; border-radius: 30px; font-weight: 600; }
+        .status-off { background: #2a1a1a; color: #ff6b6b; border: 1px solid #ff6b6b33; }
+        .status-on { background: #1a2a1a; color: #69db7c; border: 1px solid #69db7c33; }
+        .input-area { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .input-area input { flex: 1; padding: 12px 18px; border-radius: 12px; border: 1px solid #2a2a3a; background: #1a1a2a; color: #fff; min-width: 200px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-start { background: #ffbb00; color: #0a0a0f; }
+        .btn-start:hover { background: #ffcc33; }
+        .btn-stop { background: #ff4444; color: #fff; }
+        .btn-stop:hover { background: #ff6666; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .stat-card { background: #1a1a2a; padding: 14px; border-radius: 12px; border: 1px solid #2a2a3a; text-align: center; }
+        .stat-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+        .value.moedas { color: #ffbb00; }
+        .value.reais { color: #66ff99; }
+        .log-area { background: #0a0a12; border-radius: 12px; height: 300px; overflow-y: auto; padding: 16px; font-family: monospace; font-size: 13px; border: 1px solid #1a1a2a; margin-top: 12px; }
+        .log-entry { padding: 4px 0; border-bottom: 1px solid #0f0f1a; display: flex; gap: 12px; }
+        .log-time { color: #666; font-size: 11px; min-width: 60px; }
         .log-tipo-info { color: #88ccff; }
         .log-tipo-gift { color: #ffbb00; font-weight: bold; }
-        .log-tipo-nick { color: #66ff99; }
-        .log-tipo-sorteio { color: #ff9966; }
+        .log-tipo-sorteio { color: #ff9966; font-weight: bold; }
         .log-tipo-chat { color: #cc88ff; }
         .log-tipo-erro { color: #ff5555; }
-        .timestamp { color: #666; margin-right: 10px; }
-        .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
-        .status-on { background: #2e7d32; color: #a5d6a7; }
-        .status-off { background: #4a2e2e; color: #ef9a9a; }
+        .log-tipo-presente { color: #ff66aa; font-weight: bold; }
+        .log-tipo-stats { color: #66ffcc; }
+        .log-tipo-relatorio { color: #ffdd00; font-weight: bold; }
+        .historico-area { margin-top: 20px; border-top: 1px solid #2a2a3a; padding-top: 16px; }
+        .historico-area h2 { color: #ffbb00; font-size: 18px; margin-bottom: 12px; }
+        .historico-item { background: #1a1a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #2a2a3a; }
+        .historico-item .topo { display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .historico-item .topo strong { color: #fff; }
+        .historico-item .doadores { margin-top: 8px; font-size: 14px; color: #aaa; }
+        .historico-item .doadores span { color: #ffbb00; }
+        .historico-item .detalhes { margin-top: 8px; font-size: 13px; color: #888; }
+        .tabs { display: flex; gap: 12px; margin-bottom: 16px; }
+        .tab { padding: 8px 20px; border-radius: 30px; cursor: pointer; background: #1a1a2a; border: 1px solid #2a2a3a; transition: 0.3s; }
+        .tab.active { background: #ffbb00; color: #0a0a0f; border-color: #ffbb00; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎮 Live Robux Bot</h1>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span>Status: <span id="status-badge" class="status status-off">Parado</span></span>
+    <div class="header">
+        <h1>🎮 Live Robux Bot</h1>
+        <span id="status-badge" class="status status-off">🔴 Parado</span>
     </div>
-    <div class="controles">
+
+    <div class="input-area">
         <input type="text" id="live-url" placeholder="URL da live no TikTok" value="https://www.tiktok.com/...">
-        <button id="btn-iniciar">▶ Iniciar</button>
-        <button id="btn-parar">⏹ Parar</button>
+        <button id="btn-iniciar" class="btn btn-start">▶ Iniciar</button>
+        <button id="btn-parar" class="btn btn-stop" disabled>⏹ Parar</button>
     </div>
-    <div id="log-area"></div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="live">🔴 Live Atual</div>
+        <div class="tab" data-tab="historico">📊 Histórico</div>
+    </div>
+
+    <div id="tab-live" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">🎁 Presentes</div><div class="value" id="count-presentes">0</div></div>
+            <div class="stat-card"><div class="label">💎 Moedas</div><div class="value moedas" id="count-moedas">0</div></div>
+            <div class="stat-card"><div class="label">💰 Lucro (R$)</div><div class="value reais" id="count-reais">0.00</div></div>
+            <div class="stat-card"><div class="label">🎯 Gifts Fake</div><div class="value" id="count-gifts" style="color:#88ccff;">0</div></div>
+        </div>
+        <div class="log-area" id="log-area"></div>
+    </div>
+
+    <div id="tab-historico" class="tab-content">
+        <div id="historico-lista"></div>
+    </div>
 </div>
+
 <script>
     const logArea = document.getElementById('log-area');
     const statusBadge = document.getElementById('status-badge');
     const btnIniciar = document.getElementById('btn-iniciar');
     const btnParar = document.getElementById('btn-parar');
     const liveUrlInput = document.getElementById('live-url');
+    const countPresentes = document.getElementById('count-presentes');
+    const countMoedas = document.getElementById('count-moedas');
+    const countReais = document.getElementById('count-reais');
+    const countGifts = document.getElementById('count-gifts');
+    const historicoLista = document.getElementById('historico-lista');
+
+    let giftsFakeCount = 0;
+    let moedasTotal = 0;
+    let reaisTotal = 0;
 
     function adicionarLog(mensagem, tipo = 'info') {
         const entry = document.createElement('div');
         entry.className = `log-entry log-tipo-${tipo}`;
         const time = new Date().toLocaleTimeString();
-        entry.innerHTML = `<span class="timestamp">[${time}]</span> ${mensagem}`;
+        entry.innerHTML = `<span class="log-time">[${time}]</span><span>${mensagem}</span>`;
         logArea.appendChild(entry);
         logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function atualizarStats() {
+        countPresentes.textContent = document.querySelectorAll('.log-tipo-presente').length;
+        countMoedas.textContent = moedasTotal.toLocaleString('pt-BR');
+        countReais.textContent = reaisTotal.toFixed(2);
+        countGifts.textContent = giftsFakeCount;
     }
 
     const evtSource = new EventSource('/logs');
     evtSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
         adicionarLog(data.mensagem, data.tipo);
+        if (data.tipo === 'gift') giftsFakeCount++;
+        if (data.tipo === 'stats') {
+            const matchMoedas = data.mensagem.match(/(\d+)\s*moedas/);
+            const matchReais = data.mensagem.match(/R\$ ([\d,.]+)/);
+            if (matchMoedas) moedasTotal = parseInt(matchMoedas[1]);
+            if (matchReais) reaisTotal = parseFloat(matchReais[1].replace(',', '.'));
+        }
+        atualizarStats();
     };
+
+    setInterval(async () => {
+        try {
+            const res = await fetch('/live_data');
+            const data = await res.json();
+            if (data) {
+                moedasTotal = data.moedas_bruto || 0;
+                reaisTotal = data.reais_lucro || 0;
+                giftsFakeCount = data.premiados_fake ? data.premiados_fake.length : 0;
+                atualizarStats();
+            }
+        } catch(e) {}
+    }, 3000);
+
+    async function carregarHistorico() {
+        const res = await fetch('/historico');
+        const data = await res.json();
+        historicoLista.innerHTML = '';
+        if (data.lives && data.lives.length > 0) {
+            data.lives.slice().reverse().forEach((live, index) => {
+                const div = document.createElement('div');
+                div.className = 'historico-item';
+                let doadoresHtml = live.top_doadores && live.top_doadores.length > 0 ?
+                    live.top_doadores.map(d => `<span>${d.nick} (${d.presente} - ${d.moedas} moedas)</span>`).join(', ') :
+                    'Nenhum doador';
+                div.innerHTML = `
+                    <div class="topo">
+                        <strong>${live.data || 'Data desconhecida'}</strong>
+                        <span>💰 R$ ${(live.reais_lucro || 0).toFixed(2)} lucro</span>
+                    </div>
+                    <div class="detalhes">
+                        ⏱ ${live.duracao || 'N/A'} | 💎 ${(live.moedas_bruto || 0).toLocaleString('pt-BR')} moedas | 🎁 ${live.total_presentes || 0} presentes
+                    </div>
+                    <div class="doadores">🏆 Top 3: ${doadoresHtml}</div>
+                `;
+                historicoLista.appendChild(div);
+            });
+        } else {
+            historicoLista.innerHTML = '<p style="color:#666;">Nenhuma live registrada ainda.</p>';
+        }
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            if (this.dataset.tab === 'historico') carregarHistorico();
+        });
+    });
 
     btnIniciar.addEventListener('click', async () => {
         const liveUrl = liveUrlInput.value.trim();
@@ -68,6 +188,8 @@
             adicionarLog('⚠️ Insira a URL da live.', 'erro');
             return;
         }
+        btnIniciar.disabled = true;
+        btnIniciar.textContent = '⏳ Iniciando...';
         const res = await fetch('/iniciar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -76,21 +198,27 @@
         const data = await res.json();
         if (data.status === 'ok') {
             statusBadge.className = 'status status-on';
-            statusBadge.textContent = 'Rodando';
+            statusBadge.textContent = '🟢 Rodando';
+            btnParar.disabled = false;
             adicionarLog('🚀 Bot iniciado!', 'info');
         } else {
-            adicionarLog('⚠️ Já está rodando.', 'erro');
+            adicionarLog('⚠️ Já está rodando ou erro.', 'erro');
         }
+        btnIniciar.disabled = false;
+        btnIniciar.textContent = '▶ Iniciar';
     });
 
     btnParar.addEventListener('click', async () => {
         await fetch('/parar', { method: 'POST' });
         statusBadge.className = 'status status-off';
-        statusBadge.textContent = 'Parado';
+        statusBadge.textContent = '🔴 Parado';
+        btnParar.disabled = true;
         adicionarLog('⏹ Bot parado.', 'info');
+        await carregarHistorico();
     });
 
     adicionarLog('📡 Conectado ao servidor. Aguardando comandos...', 'info');
+    carregarHistorico();
 </script>
 </body>
 </html>
