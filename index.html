@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Robux Bot</title>
+    <style>
+        body { background: #0d0d0d; color: #eee; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 30px; }
+        .container { max-width: 700px; width: 100%; background: #1a1a1a; border-radius: 16px; padding: 24px; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        h1 { color: #ffbb00; }
+        input, button { padding: 10px; border-radius: 8px; border: none; font-size: 16px; }
+        input { width: 70%; background: #2a2a2a; color: #fff; }
+        button { background: #ffbb00; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #ffcc33; }
+        .controles { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        #log-area { background: #0d0d0d; border: 1px solid #333; border-radius: 8px; height: 400px; overflow-y: auto; padding: 12px; font-size: 14px; font-family: monospace; color: #ccc; }
+        .log-entry { padding: 4px 0; border-bottom: 1px solid #222; }
+        .log-tipo-info { color: #88ccff; }
+        .log-tipo-gift { color: #ffbb00; font-weight: bold; }
+        .log-tipo-nick { color: #66ff99; }
+        .log-tipo-sorteio { color: #ff9966; }
+        .log-tipo-chat { color: #cc88ff; }
+        .log-tipo-erro { color: #ff5555; }
+        .timestamp { color: #666; margin-right: 10px; }
+        .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        .status-on { background: #2e7d32; color: #a5d6a7; }
+        .status-off { background: #4a2e2e; color: #ef9a9a; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎮 Live Robux Bot</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Status: <span id="status-badge" class="status status-off">Parado</span></span>
+    </div>
+    <div class="controles">
+        <input type="text" id="live-url" placeholder="URL da live no TikTok" value="https://www.tiktok.com/...">
+        <button id="btn-iniciar">▶ Iniciar</button>
+        <button id="btn-parar">⏹ Parar</button>
+    </div>
+    <div id="log-area"></div>
+</div>
+<script>
+    const logArea = document.getElementById('log-area');
+    const statusBadge = document.getElementById('status-badge');
+    const btnIniciar = document.getElementById('btn-iniciar');
+    const btnParar = document.getElementById('btn-parar');
+    const liveUrlInput = document.getElementById('live-url');
+
+    function adicionarLog(mensagem, tipo = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-tipo-${tipo}`;
+        const time = new Date().toLocaleTimeString();
+        entry.innerHTML = `<span class="timestamp">[${time}]</span> ${mensagem}`;
+        logArea.appendChild(entry);
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    const evtSource = new EventSource('/logs');
+    evtSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        adicionarLog(data.mensagem, data.tipo);
+    };
+
+    btnIniciar.addEventListener('click', async () => {
+        const liveUrl = liveUrlInput.value.trim();
+        if (!liveUrl) {
+            adicionarLog('⚠️ Insira a URL da live.', 'erro');
+            return;
+        }
+        const res = await fetch('/iniciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ live_url: liveUrl })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+            statusBadge.className = 'status status-on';
+            statusBadge.textContent = 'Rodando';
+            adicionarLog('🚀 Bot iniciado!', 'info');
+        } else {
+            adicionarLog('⚠️ Já está rodando.', 'erro');
+        }
+    });
+
+    btnParar.addEventListener('click', async () => {
+        await fetch('/parar', { method: 'POST' });
+        statusBadge.className = 'status status-off';
+        statusBadge.textContent = 'Parado';
+        adicionarLog('⏹ Bot parado.', 'info');
+    });
+
+    adicionarLog('📡 Conectado ao servidor. Aguardando comandos...', 'info');
+</script>
+</body>
+</html>
